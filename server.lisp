@@ -71,3 +71,48 @@
   (make-dao 'furniture :name "lamp" :colour "black" :stock 1))
 (with-connection (db-params)
   (make-dao 'furniture :name "chair" :colour "grey" :stock 2))
+
+;;; ---------------------------------------------------
+;;; Write the CRUD (Create, Read, Update, Delete) logic
+;;; ---------------------------------------------------
+
+;;  (copied from: https://kuomarc.wordpress.com/2012/05/13/12-steps-to-build-and-deploy-common-lisp-in-the-cloud-and-comparing-rails/)
+(defmacro furniture-create (&rest args)
+   `(with-connection (db-params)
+      (make-dao 'furniture ,@args)))
+
+(defun furniture-get-all ()
+   (with-connection (db-params)
+     (select-dao 'furniture)))
+
+(defun furniture-get (id)
+   (with-connection (db-params)
+     (get-dao 'furniture id)))
+
+(defmacro furniture-select (sql-test &optional sort)
+   `(with-connection (db-params)
+      (select-dao 'furniture ,sql-test ,sort)))
+
+(defun furniture-update (furniture)
+   (with-connection (db-params)
+     (update-dao furniture)))
+
+(defun furniture-delete (furniture)
+   (with-connection (db-params)
+     (delete-dao furniture)))
+
+;; test some of those macros and functions
+(furniture-create :name "bed" :colour "white" :stock 1)
+(furniture-get-all)
+(furniture-get 1)
+(furniture-select (:= 'name "lamp")) ; returns a list with every dao whose name is "lamp"
+
+(let ((lamp (furniture-get 2)))
+  (setf (furniture-stock lamp) 55)
+  (furniture-update lamp))
+
+(destructuring-bind (lamp &rest rest) (furniture-select (:= 'name "lamp"))
+  (setf (furniture-stock lamp) 99)
+  (furniture-update lamp))
+
+(furniture-delete (furniture-get 4))
