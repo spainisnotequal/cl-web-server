@@ -46,67 +46,85 @@
 (with-connection (db-params)
   (query (:select '* :from 'gold_price)))
 
-;;; ------------------------------------
-;;; Create a table and insert some items
-;;; ------------------------------------
 
-;; Create a (dao-)class, that represents the table we want to create
-(defclass furniture ()
-  ((id     :col-type serial                   :reader furniture-id)
-   (name   :col-type string  :initarg :name   :accessor furniture-name)
-   (colour :col-type string  :initarg :colour :accessor furniture-colour)
-   (stock  :col-type integer :initarg :stock  :accessor furniture-stock))
-  (:metaclass dao-class) 
-  (:keys id))
+;;; -----------------------------------------------------------------
+;;; Macro to define the model (the dao-class and the CRUD operations)
+;;; -----------------------------------------------------------------
 
-;; Create the table
-(with-connection
-    (db-params)
-           (execute (dao-table-definition 'furniture)))
+;; first, a couple of utility funtions (from "On Lisp", page 58)
+(defun mkstr (&rest args)
+  (with-output-to-string (s)
+    (dolist (a args) (princ a s))))
 
-;; Insert some items into the table
-(with-connection (db-params)
-  (make-dao 'furniture :name "desk" :colour "brown" :stock 3))
-(with-connection (db-params)
-  (make-dao 'furniture :name "lamp" :colour "black" :stock 1))
-(with-connection (db-params)
-  (make-dao 'furniture :name "chair" :colour "grey" :stock 2))
-
-;;; ---------------------------------------------------
-;;; Write the CRUD (Create, Read, Update, Delete) logic
-;;; ---------------------------------------------------
+(defun symb (&rest args)
+  (values (intern (apply #'mkstr args))))
 
 ;;  (copied from: https://kuomarc.wordpress.com/2012/05/13/12-steps-to-build-and-deploy-common-lisp-in-the-cloud-and-comparing-rails/)
-(defmacro furniture-create (&rest args)
-   `(with-connection (db-params)
-      (make-dao 'furniture ,@args)))
+(defmacro defmodel (name slot-definitions)
+  `(progn
+     ;; Define de dao-class and create the table
+     (defclass ,name ()
+       ((id :col-type serial :reader ,(symb name 'id))
+	,@slot-definitions)		      
+       (:metaclass dao-class)
+       (:keys id))
+     (with-connection (db-params)
+       (unless (table-exists-p ',name)
+	 (execute (dao-table-definition ',name))))
+     
+     ;; Create
+     (defmacro ,(symb name 'create) (&rest args)
+       `(with-connection (db-params)
+	  (make-dao ',',name ,@args)))
+     
+     ;; Get-all
+     (defun ,(symb name 'get-all) ()
+       (with-connection (db-params)
+	 (select-dao ',name)))
 
-(defun furniture-get-all ()
-   (with-connection (db-params)
-     (select-dao 'furniture)))
+     ;; Get (by id)
+     (defun ,(symb name 'get) (id)
+       (with-connection (db-params)
+	 (get-dao ',name id)))
 
-(defun furniture-get (id)
-   (with-connection (db-params)
-     (get-dao 'furniture id)))
+     ;; Select
+     (defmacro ,(symb name 'select) (sql-test &optional sort)
+       `(with-connection (db-params)
+	  (select-dao ',',name ,sql-test ,sort)))
+     
+     ;; Update
+     (defun ,(symb name 'update) (,name)
+       (with-connection (db-params)
+	 (update-dao ,name)))
+     
+     ;; Delete
+     (defun ,(symb name 'delete) (,name)
+       (with-connection (db-params)
+	 (delete-dao ,name)))))
 
-(defmacro furniture-select (sql-test &optional sort)
-   `(with-connection (db-params)
-      (select-dao 'furniture ,sql-test ,sort)))
 
-(defun furniture-update (furniture)
-   (with-connection (db-params)
-     (update-dao furniture)))
+;;; --------------------------------------------
+;;; Create a table and make some CRUD operations
+;;; --------------------------------------------
 
-(defun furniture-delete (furniture)
-   (with-connection (db-params)
-     (delete-dao furniture)))
+;; Define the model and create the table
+(defmodel furniture
+    ((name   :col-type string  :initarg :name   :accessor furniture-name)
+     (colour :col-type string  :initarg :colour :accessor furniture-colour)
+     (stock  :col-type integer :initarg :stock  :accessor furniture-stock)))
 
-;; test some of those macros and functions
-(furniture-create :name "bed" :colour "white" :stock 1)
+;; Create
+(furniture-create :name "bed"   :colour "white" :stock 1)
+(furniture-create :name "desk"  :colour "brown" :stock 3)
+(furniture-create :name "lamp"  :colour "black" :stock 5)
+(furniture-create :name "chair" :colour "grey"  :stock 7)
+
+;; Read
 (furniture-get-all)
 (furniture-get 1)
 (furniture-select (:= 'name "lamp")) ; returns a list with every dao whose name is "lamp"
 
+;; Update
 (let ((lamp (furniture-get 2)))
   (setf (furniture-stock lamp) 55)
   (furniture-update lamp))
@@ -115,4 +133,5 @@
   (setf (furniture-stock lamp) 99)
   (furniture-update lamp))
 
+;; Delete
 (furniture-delete (furniture-get 4))
