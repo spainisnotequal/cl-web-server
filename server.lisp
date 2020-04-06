@@ -39,12 +39,12 @@
       *local-db-params*))
 
 ;; test the connection
-(postmodern:with-connection (db-params)
-  (postmodern:query (:select (:+ 1 2)) :single))
+(with-connection (db-params)
+  (query (:select (:+ 1 2)) :single))
 
 ;; get all data from the "gold_price" table
-(postmodern:with-connection (db-params)
-  (postmodern:query (:select '* :from 'gold_price)))
+(with-connection (db-params)
+  (query (:select '* :from 'gold_price)))
 
 ;;; ------------------------------------
 ;;; Create a table and insert some items
@@ -56,16 +56,18 @@
    (name   :col-type string  :initarg :name   :accessor furniture-name)
    (colour :col-type string  :initarg :colour :accessor furniture-colour)
    (stock  :col-type integer :initarg :stock  :accessor furniture-stock))
-  (:metaclass postmodern:dao-class) 
+  (:metaclass dao-class) 
   (:keys id))
 
 ;; Create the table
-(postmodern:with-connection
+(with-connection
     (db-params)
-           (postmodern:execute (postmodern:dao-table-definition 'furniture)))
+           (execute (dao-table-definition 'furniture)))
 
 ;; Insert some items into the table
-(postmodern:with-connection (db-params)
-  (postmodern:make-dao 'furniture :name "desk" :colour "brown" :stock 3))
-(postmodern:with-connection (db-params)
-  (postmodern:make-dao 'furniture :name "lamp" :colour "black" :stock 1))
+(with-connection (db-params)
+  (make-dao 'furniture :name "desk" :colour "brown" :stock 3))
+(with-connection (db-params)
+  (make-dao 'furniture :name "lamp" :colour "black" :stock 1))
+(with-connection (db-params)
+  (make-dao 'furniture :name "chair" :colour "grey" :stock 2))
