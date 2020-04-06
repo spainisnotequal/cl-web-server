@@ -2,6 +2,7 @@
 
 (in-package #:cl-web-server)
 
+
 ;;; ----------------
 ;;; Start the server
 ;;; ----------------
@@ -17,6 +18,7 @@
                                           :document-root (uiop:parse-unix-namestring "./www/")))))
 
 (start-server)
+
 
 ;;; -----------------------
 ;;; Connect to the database
@@ -42,10 +44,6 @@
 (with-connection (db-params)
   (query (:select (:+ 1 2)) :single))
 
-;; get all data from the "gold_price" table
-(with-connection (db-params)
-  (query (:select '* :from 'gold_price)))
-
 
 ;;; -----------------------------------------------------------------
 ;;; Macro to define the model (the dao-class and the CRUD operations)
@@ -62,7 +60,7 @@
 ;;  (copied from: https://kuomarc.wordpress.com/2012/05/13/12-steps-to-build-and-deploy-common-lisp-in-the-cloud-and-comparing-rails/)
 (defmacro defmodel (name slot-definitions)
   `(progn
-     ;; Define de dao-class and create the table
+     ;; Define the dao-class and create the table
      (defclass ,name ()
        ((id :col-type serial :reader ,(symb name 'id))
 	,@slot-definitions)		      
