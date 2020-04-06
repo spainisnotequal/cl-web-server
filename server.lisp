@@ -45,3 +45,27 @@
 ;; get all data from the "gold_price" table
 (postmodern:with-connection (db-params)
   (postmodern:query (:select '* :from 'gold_price)))
+
+;;; ------------------------------------
+;;; Create a table and insert some items
+;;; ------------------------------------
+
+;; Create a (dao-)class, that represents the table we want to create
+(defclass furniture ()
+  ((id     :col-type serial                   :reader furniture-id)
+   (name   :col-type string  :initarg :name   :accessor furniture-name)
+   (colour :col-type string  :initarg :colour :accessor furniture-colour)
+   (stock  :col-type integer :initarg :stock  :accessor furniture-stock))
+  (:metaclass postmodern:dao-class) 
+  (:keys id))
+
+;; Create the table
+(postmodern:with-connection
+    (db-params)
+           (postmodern:execute (postmodern:dao-table-definition 'furniture)))
+
+;; Insert some items into the table
+(postmodern:with-connection (db-params)
+  (postmodern:make-dao 'furniture :name "desk" :colour "brown" :stock 3))
+(postmodern:with-connection (db-params)
+  (postmodern:make-dao 'furniture :name "lamp" :colour "black" :stock 1))
