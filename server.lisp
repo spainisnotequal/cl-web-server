@@ -138,7 +138,7 @@
 ;;; Add routes
 ;;; ----------
 
-(easy-routes:defroute get-all ("/api/furniture" :method :get) ()
+(defroute get-all ("/api/furniture" :method :get) ()
   (json-response :status +http-ok+
                  :headers '(("Content-Type" . "application/json")
                             ("Accept" . "application/json"))
@@ -146,7 +146,7 @@
                  ; :error "Not applicable here, but for demonstration..."
                  ))
 
-(easy-routes:defroute get-furniture ("/api/furniture/:id" :method :get) ()
+(defroute get-furniture ("/api/furniture/:id" :method :get) ()
   (json-response :status +http-ok+
                  :headers '(("Content-Type" . "application/json")
                             ("Accept" . "application/json"))
