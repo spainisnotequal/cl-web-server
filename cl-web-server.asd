@@ -8,6 +8,8 @@
   :serial t
   :depends-on (#:hunchentoot
                #:uiop
-               #:postmodern)
+               #:postmodern
+               #:easy-routes
+               #:json-responses)
   :components ((:file "package")
                (:file "server")))

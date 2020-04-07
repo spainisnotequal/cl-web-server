@@ -11,11 +11,10 @@
 
 (defun start-server (&optional (port 5000))
   (when *acceptor*
-    (hunchentoot:stop *acceptor*))
+    (stop *acceptor*))
   (setf *acceptor*
-        (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor
-                                          :port port
-                                          :document-root (uiop:parse-unix-namestring "./www/")))))
+        (start (make-instance 'easy-routes:routes-acceptor
+                              :port port))))
 
 (start-server)
 
@@ -132,4 +131,25 @@
   (furniture-update lamp))
 
 ;; Delete
-(furniture-delete (furniture-get 1))
+(furniture-delete (furniture-get 24))
+
+
+;;; ----------
+;;; Add routes
+;;; ----------
+
+(easy-routes:defroute get-all ("/api/furniture" :method :get) ()
+  (json-response :status +http-ok+
+                 :headers '(("Content-Type" . "application/json")
+                            ("Accept" . "application/json"))
+                 :data (furniture-get-all)
+                 ; :error "Not applicable here, but for demonstration..."
+                 ))
+
+(easy-routes:defroute get-furniture ("/api/furniture/:id" :method :get) ()
+  (json-response :status +http-ok+
+                 :headers '(("Content-Type" . "application/json")
+                            ("Accept" . "application/json"))
+                 :data (furniture-get id)
+                 ; :error "Not applicable here, but for demonstration..."
+                 ))
