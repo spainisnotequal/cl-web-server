@@ -49,13 +49,13 @@
 ;;; Macro to define the model (the dao-class and the CRUD operations)
 ;;; -----------------------------------------------------------------
 
-;; first, a couple of utility funtions (from "On Lisp", page 58)
-(defun mkstr (&rest args)
-  (with-output-to-string (s)
-    (dolist (a args) (princ a s))))
-
-(defun symb (&rest args)
-  (values (intern (apply #'mkstr args))))
+;; "symb" funtion copied from: https://github.com/mck-/heroku-cl-example/blob/master/src/util/general-utils.lisp
+;; (he adapted it from "On Lisp", page 58)
+;; I need to put it inside an "eval-when" expression in order to use it later in
+;; this same file, as it's pointed in: https://stackoverflow.com/a/49922152/9466271
+(eval-when (:compile-toplevel :load-toplevel :execute)  
+           (defun symb (a b)
+             (intern (format nil "~a-~a" (symbol-name a) (symbol-name b)))))
 
 ;;  (copied from: https://kuomarc.wordpress.com/2012/05/13/12-steps-to-build-and-deploy-common-lisp-in-the-cloud-and-comparing-rails/)
 (defmacro defmodel (name slot-definitions)
@@ -132,4 +132,4 @@
   (furniture-update lamp))
 
 ;; Delete
-(furniture-delete (furniture-get 4))
+(furniture-delete (furniture-get 1))
