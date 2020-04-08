@@ -11,9 +11,10 @@
 
 (defun start-server (&optional (port 5000))
   (when *acceptor*
-    (stop *acceptor*))
+    (hunchentoot:stop *acceptor*)
+    (setf *acceptor* nil))
   (setf *acceptor*
-        (start (make-instance 'easy-routes:routes-acceptor
+        (hunchentoot:start (make-instance 'routes-acceptor ; "routes-acceptor" from the "easy-routes" library
                               :port port))))
 
 (start-server)
@@ -139,7 +140,7 @@
 ;;; ----------
 
 (defroute get-all ("/api/furniture" :method :get) ()
-  (json-response :status +http-ok+
+  (json-response :status hunchentoot:+http-ok+
                  :headers '(("Content-Type" . "application/json")
                             ("Accept" . "application/json"))
                  :data (furniture-get-all)
@@ -147,7 +148,7 @@
                  ))
 
 (defroute get-furniture ("/api/furniture/:id" :method :get) ()
-  (json-response :status +http-ok+
+  (json-response :status hunchentoot:+http-ok+
                  :headers '(("Content-Type" . "application/json")
                             ("Accept" . "application/json"))
                  :data (furniture-get id)
