@@ -111,28 +111,28 @@
      (colour :col-type string  :initarg :colour :accessor furniture-colour)
      (stock  :col-type integer :initarg :stock  :accessor furniture-stock)))
 
-;; Create
-(furniture-create :name "bed"   :colour "white" :stock 1)
-(furniture-create :name "desk"  :colour "brown" :stock 3)
-(furniture-create :name "lamp"  :colour "black" :stock 5)
-(furniture-create :name "chair" :colour "grey"  :stock 7)
+;; ;; Create
+;; (furniture-create :name "bed"   :colour "white" :stock 1)
+;; (furniture-create :name "desk"  :colour "brown" :stock 3)
+;; (furniture-create :name "lamp"  :colour "black" :stock 5)
+;; (furniture-create :name "chair" :colour "grey"  :stock 7)
 
-;; Read
-(furniture-get-all)
-(furniture-get 1)
-(furniture-select (:= 'name "lamp")) ; returns a list with every dao whose name is "lamp"
+;; ;; Read
+;; (furniture-get-all)
+;; (furniture-get 1)
+;; (furniture-select (:= 'name "lamp")) ; returns a list with every dao whose name is "lamp"
 
-;; Update
-(let ((lamp (furniture-get 2)))
-  (setf (furniture-stock lamp) 55)
-  (furniture-update lamp))
+;; ;; Update
+;; (let ((lamp (furniture-get 2)))
+;;   (setf (furniture-stock lamp) 55)
+;;   (furniture-update lamp))
 
-(destructuring-bind (lamp &rest rest) (furniture-select (:= 'name "lamp"))
-  (setf (furniture-stock lamp) 99)
-  (furniture-update lamp))
+;; (destructuring-bind (lamp &rest rest) (furniture-select (:= 'name "lamp"))
+;;   (setf (furniture-stock lamp) 99)
+;;   (furniture-update lamp))
 
-;; Delete
-(furniture-delete (furniture-get 24))
+;; ;; Delete
+;; (furniture-delete (furniture-get 24))
 
 
 ;;; ----------
@@ -159,3 +159,13 @@
                  :data (furniture-get id)
                                         ; :error "Not applicable here, but for demonstration..."
                  ))
+
+;; The query paramater should be: name?lamp
+;; but not: name?"lamp"
+;; because we already are indicating that "name" is a parameter of type "string".
+;; So the correct URL is: http://localhost:5000/api/furniture-by-name?name=lamp
+(defroute get-furniture-by-name ("/api/furniture-by-name" :method :get
+                                                          :decorators (@json))
+    ((name :parameter-type 'string))
+  (json-response :status hunchentoot:+http-ok+
+                 :data (furniture-select (:= 'name name))))
