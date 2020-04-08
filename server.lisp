@@ -139,18 +139,23 @@
 ;;; Add routes
 ;;; ----------
 
-(defroute get-all ("/api/furniture" :method :get) ()
+;; Decorator to set the "Content-Tyoe" as JSON data
+(defun @json (next)
+  (setf (hunchentoot:content-type*) "application/json")
+  (funcall next))
+
+;; Define routes
+
+(defroute get-all ("/api/furniture" :method :get
+                                    :decorators (@json)) ()
   (json-response :status hunchentoot:+http-ok+
-                 :headers '(("Content-Type" . "application/json")
-                            ("Accept" . "application/json"))
                  :data (furniture-get-all)
                                         ; :error "Not applicable here, but for demonstration..."
                  ))
 
-(defroute get-furniture ("/api/furniture/:id" :method :get) ()
+(defroute get-furniture ("/api/furniture/:id" :method :get
+                                              :decorators (@json)) ()
   (json-response :status hunchentoot:+http-ok+
-                 :headers '(("Content-Type" . "application/json")
-                            ("Accept" . "application/json"))
                  :data (furniture-get id)
                                         ; :error "Not applicable here, but for demonstration..."
                  ))
