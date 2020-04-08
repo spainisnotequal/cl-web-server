@@ -15,7 +15,7 @@
     (setf *acceptor* nil))
   (setf *acceptor*
         (hunchentoot:start (make-instance 'routes-acceptor ; "routes-acceptor" from the "easy-routes" library
-                              :port port))))
+                                          :port port))))
 
 (start-server)
 
@@ -54,8 +54,8 @@
 ;; I need to put it inside an "eval-when" expression in order to use it later in
 ;; this same file, as it's pointed in: https://stackoverflow.com/a/49922152/9466271
 (eval-when (:compile-toplevel :load-toplevel :execute)  
-           (defun symb (a b)
-             (intern (format nil "~a-~a" (symbol-name a) (symbol-name b)))))
+  (defun symb (a b)
+    (intern (format nil "~a-~a" (symbol-name a) (symbol-name b)))))
 
 ;;  (copied from: https://kuomarc.wordpress.com/2012/05/13/12-steps-to-build-and-deploy-common-lisp-in-the-cloud-and-comparing-rails/)
 (defmacro defmodel (name slot-definitions)
@@ -144,7 +144,7 @@
                  :headers '(("Content-Type" . "application/json")
                             ("Accept" . "application/json"))
                  :data (furniture-get-all)
-                 ; :error "Not applicable here, but for demonstration..."
+                                        ; :error "Not applicable here, but for demonstration..."
                  ))
 
 (defroute get-furniture ("/api/furniture/:id" :method :get) ()
@@ -152,5 +152,5 @@
                  :headers '(("Content-Type" . "application/json")
                             ("Accept" . "application/json"))
                  :data (furniture-get id)
-                 ; :error "Not applicable here, but for demonstration..."
+                                        ; :error "Not applicable here, but for demonstration..."
                  ))
