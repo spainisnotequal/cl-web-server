@@ -169,3 +169,17 @@
     ((name :parameter-type 'string))
   (json-response :status hunchentoot:+http-ok+
                  :data (furniture-select (:= 'name name))))
+
+;; We can get several query parameters at the same time by using somehting like
+;; the "foo" route below. For example, if the URL is: http://localhost:5000/foo?id=42&stock=99
+;; we'll get: {"error":null,"data":"{id: 42, name: NIL, colour: NIL, stock: 99}"}
+;; So we have to specify the exact names of the query parameters to correctly
+;; gather their values.
+(defroute foo ("/foo" :method :get
+                              :decorators (@json))
+    ((id :parameter-type 'integer)
+     (name :parameter-type 'string)
+     (colour :parameter-type 'string)
+     (stock :parameter-type 'integer))
+  (json-response :status hunchentoot:+http-ok+
+                 :data (format nil "{id: ~a, name: ~a, colour: ~a, stock: ~a}" id name colour stock)))
