@@ -177,9 +177,9 @@
 ;; gather their values.
 (defroute foo ("/foo" :method :get
                               :decorators (@json))
-    ((id :parameter-type 'integer)
-     (name :parameter-type 'string)
+    ((id     :parameter-type 'integer)
+     (name   :parameter-type 'string)
      (colour :parameter-type 'string)
-     (stock :parameter-type 'integer))
+     (stock  :parameter-type 'integer))
   (json-response :status hunchentoot:+http-ok+
                  :data (format nil "{id: ~a, name: ~a, colour: ~a, stock: ~a}" id name colour stock)))
